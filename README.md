@@ -106,7 +106,7 @@ As shown in the screen shot, in the Azure Portal, go to the storage account cont
     from pyspark.sql import SparkSession
     from pyspark.sql.types import (StructType, StructField, StringType, DateType)
 
-# columns for the DataFrame
+### columns for the DataFrame
 
     COL_NAMES = ['book_id', 'author', 'title', 'genre', 'price', 'publish_date', 'description']
     ELEMENTS_TO_EXTRAT = [c for c in COL_NAMES if c != 'book_id']
@@ -141,15 +141,15 @@ As shown in the screen shot, in the Azure Portal, go to the storage account cont
   
 ### Step 9: Follow the below instruction to create Azure Key Vault
 
-# Key Vault-backed secret scopes
+### Key Vault-backed secret scopes
 
 Azure Databricks has two types of secret scopes: Key Vault-backed and Databricks-backed. These secret scopes allow you to store secrets, such as database connection strings, securely. If someone tries to output a secret to a notebook, it is replaced by `[REDACTED]`. This helps prevent someone from viewing the secret or accidentally leaking it when displaying or sharing the notebook.
 
-# Setup
+### Setup
 
 To begin, you will need to create the required resources in the Azure portal. Follow the steps below to create a Key Vault service, and Azure Cosmos DB.
 
-# Azure Key Vault
+### Azure Key Vault
 
 1. Open <https://portal.azure.com> in a new browser tab.
 2. Select the **Create a resource** option on the upper left-hand corner of the Azure portal
