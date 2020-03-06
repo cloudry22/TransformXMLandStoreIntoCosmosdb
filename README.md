@@ -49,97 +49,95 @@ As shown in the screen shot, in the Azure Portal, go to the storage account cont
 
 ### Step 2: Paste the following code in your Azure databricks notebook and update the code as instructed. 
 
-SasURL = "<Paste blob service SAS URL here>"
-indQuestionMark = SasURL.index('?')
-SasKey = SasURL[indQuestionMark:len(SasURL)]
-StorageAccount = "<Enter your storage account name>"
-ContainerName = "<Enter your container name>"
-MountPoint = "/mnt/<enter your mount point name>"
+    SasURL = "<Paste blob service SAS URL here>"
+    indQuestionMark = SasURL.index('?')
+    SasKey = SasURL[indQuestionMark:len(SasURL)]
+    StorageAccount = "<Enter your storage account name>"
+    ContainerName = "<Enter your container name>"
+    MountPoint = "/mnt/<enter your mount point name>"
 
-dbutils.fs.mount(
-  source = "wasbs://%s@%s.blob.core.windows.net/" % (ContainerName, StorageAccount),
-  mount_point = MountPoint,
-  extra_configs = {"fs.azure.sas.%s.%s.blob.core.windows.net" % (ContainerName, StorageAccount) : "%s" % SasKey}
-)
+    dbutils.fs.mount(
+      source = "wasbs://%s@%s.blob.core.windows.net/" % (ContainerName, StorageAccount),
+      mount_point = MountPoint,
+      extra_configs = {"fs.azure.sas.%s.%s.blob.core.windows.net" % (ContainerName, StorageAccount) : "%s" % SasKey}
+    )
 
 ### Step 3: Paste the following line into your Azure Databricks notebook to mount Azure Datalake Storage Gen2 container
 
-%fs mounts
+    %fs mounts
 
 ### Step 4: Paste the following line into your Azure Databricks notebook to see the list of file under your mountpoint
 
-%fs ls /mnt/<enter your mount point name here>
+    %fs ls /mnt/<enter your mount point name here>
   
 ### Step 5: Paste the following code into your Azure Databricks notebook to parse xml tree, extract the records and transform to new RDD
 
-file_rdd = spark.read.text("/mnt/<Enter your mountpoint name>/books.xml", wholetext=True).rdd
+    file_rdd = spark.read.text("/mnt/<Enter your mountpoint name>/books.xml", wholetext=True).rdd
 
-def parse_xml(rdd):
-    """
-    Read the xml string from rdd, parse and extract the elements,
-    then return a list of list.
-    """
-    results = []
-    root = ET.fromstring(rdd[0])
+    def parse_xml(rdd):
+        """
+        Read the xml string from rdd, parse and extract the elements,
+        then return a list of list.
+        """
+        results = []
+        root = ET.fromstring(rdd[0])
 
-    for b in root.findall('book'):
-        rec = []
-        rec.append(b.attrib['id'])
-        for e in ELEMENTS_TO_EXTRAT:
-            if b.find(e) is None:
-                rec.append(None)
-                continue
-            value = b.find(e).text
-            if e == 'publish_date':
-                value = datetime.strptime(value, '%Y-%m-%d')
-            rec.append(value)
-        results.append(rec)
+        for b in root.findall('book'):
+            rec = []
+            rec.append(b.attrib['id'])
+            for e in ELEMENTS_TO_EXTRAT:
+                if b.find(e) is None:
+                    rec.append(None)
+                    continue
+                value = b.find(e).text
+                if e == 'publish_date':
+                    value = datetime.strptime(value, '%Y-%m-%d')
+                rec.append(value)
+            results.append(rec)
 
-    return results
+        return results
   
-  records_rdd = file_rdd.flatMap(parse_xml)
+      records_rdd = file_rdd.flatMap(parse_xml)
 
 ### Step 6: Paste the following code into your Azure Databricks notebook to define the schema
 
-from datetime import datetime
-import xml.etree.ElementTree as ET
-
-from pyspark.sql import SparkSession
-from pyspark.sql.types import (StructType, StructField, StringType,
-   DateType)
+    from datetime import datetime
+    import xml.etree.ElementTree as ET
+    from pyspark.sql import SparkSession
+    from pyspark.sql.types import (StructType, StructField, StringType, DateType)
 
 # columns for the DataFrame
-COL_NAMES = ['book_id', 'author', 'title', 'genre', 'price', 'publish_date',
-            'description']
-ELEMENTS_TO_EXTRAT = [c for c in COL_NAMES if c != 'book_id']
 
-def set_schema():
-    """
-    Define the schema for the DataFrame
-    """
-    schema_list = []
-    for c in COL_NAMES:
-        if c == 'publish_date':
-            schema_list.append(StructField(c, DateType(), True))
-        else:
-            schema_list.append(StructField(c, StringType(), True))
+    COL_NAMES = ['book_id', 'author', 'title', 'genre', 'price', 'publish_date', 'description']
+    ELEMENTS_TO_EXTRAT = [c for c in COL_NAMES if c != 'book_id']
+
+    def set_schema():
+        """
+        Define the schema for the DataFrame
+        """
+        schema_list = []
+        for c in COL_NAMES:
+            if c == 'publish_date':
+                schema_list.append(StructField(c, DateType(), True))
+            else:
+                schema_list.append(StructField(c, StringType(), True))
     
-    return StructType(schema_list)
-if __name__ == "__main__":
-    spark = SparkSession\
-        .builder\
-        .getOrCreate()
+        return StructType(schema_list)
+    if __name__ == "__main__":
+        spark = SparkSession\
+            .builder\
+            .getOrCreate()
 
-my_schema = set_schema()
+    my_schema = set_schema()
 
 ### Step 7: Paste the following code into your Azure Databricks notebook to convert RDDs to Dataframe with the pre-defined schema
 
-book_df = records_rdd.toDF(my_schema)
-book_df.show()
+    book_df = records_rdd.toDF(my_schema)
+    book_df.show()
 
 ### Step 8: Paste the following code into your Azure Databricks notebook to write Dataframe to your mountpoint
 
-book = book_df.write.parquet("/mnt/<enter your mountpoint name here>/output/book.parquet")
+    book = book_df.write.parquet("/mnt/<enter your mountpoint name here>/output/book.parquet")
   
 ### Step 9: Follow the below instruction to create Azure Key Vault
 
@@ -293,25 +291,25 @@ Once complete, return to this notebook to continue with the lesson.
 
 In a previous lesson, you created two secrets in Key Vault for your Azure Cosmos DB instance: **cosmos-uri** and **cosmos-key**. These two values will be used to configure the Cosmos DB connector. Let's start out by retrieving those values and storing them in new variables. Enter the following two lines of code in your Azure databricks cell and run it.
 
-uri = dbutils.secrets.get(scope = "key-vault-secrets", key = "cosmos-uri")
-key = dbutils.secrets.get(scope = "key-vault-secrets", key = "cosmos-key")
+    uri = dbutils.secrets.get(scope = "key-vault-secrets", key = "cosmos-uri")
+    key = dbutils.secrets.get(scope = "key-vault-secrets", key = "cosmos-key")
 
 ### Step 15: Paste the following code to your Azure Databricks notebook cell to Write transformed data to Cosmos DB
 
-readDF = spark.read.parquet("/mnt/<Enter your mountpoint name here>/output/book.parquet")
-writeConfig = {
-"Endpoint" : uri,
-"Masterkey" : key,
-"Database" : "<Enter your Cosmos DB name here>",
-"Collection" : "<Enter your CosmosDB container name here>",
-"Upsert" : "true"
-}
-(readDF
- .write
- .format("com.microsoft.azure.cosmosdb.spark")
- .mode("overwrite")
- .options(**writeConfig)
- .save()
-)
+    readDF = spark.read.parquet("/mnt/<Enter your mountpoint name here>/output/book.parquet")
+    writeConfig = {
+    "Endpoint" : uri,
+    "Masterkey" : key,
+    "Database" : "<Enter your Cosmos DB name here>",
+    "Collection" : "<Enter your CosmosDB container name here>",
+    "Upsert" : "true"
+    }
+    (readDF
+    .write
+    .format("com.microsoft.azure.cosmosdb.spark")
+    .mode("overwrite")
+    .options(**writeConfig)
+    .save()
+    )
   
 ### Step 16: Go to Azure portal and access your CosmosDB and go to data explorer. You will be able to see the data under your collection name.
