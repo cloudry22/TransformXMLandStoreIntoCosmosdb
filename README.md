@@ -1,6 +1,6 @@
 # XML File transformation and storing data into Azure CosmosDB - Sample code
 
-The project transforms sample xml file(book.xml) using Apache spark managed by Azure Databricks. Post transformation it stores the data to Azure CosmosDB.
+The project transforms sample xml file(books.xml) using Apache spark managed by Azure Databricks. Post transformation it stores the data to Azure CosmosDB.
 
 ## Features
 
