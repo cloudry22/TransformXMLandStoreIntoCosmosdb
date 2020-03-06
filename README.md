@@ -96,8 +96,8 @@ def parse_xml(rdd):
         results.append(rec)
 
     return results
-
-records_rdd = file_rdd.flatMap(parse_xml)
+  
+  records_rdd = file_rdd.flatMap(parse_xml)
 
 ### Step 6: Paste the following code into your Azure Databricks notebook to define the schema
 
