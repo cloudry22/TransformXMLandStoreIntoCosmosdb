@@ -216,7 +216,7 @@ To begin, you will need to create the required resources in the Azure portal. Fo
     - **Database**: The name of the database (`demos`)
     - **Collection**: The name of the collection that you wish to query (`documents`)
     
-    ![Cosmos DB Keys](https://databricksdemostore.blob.core.windows.net/images/04-MDW/cosmos-db-keys.png)
+    ![Cosmos DB Keys](https://xmlparse.blob.core.windows.net/xmlparse/CosmosDBKeys.PNG)
 
 ### Step 11: Configure Azure Databricks to access Azure Key Valut and CosmosDB
 
