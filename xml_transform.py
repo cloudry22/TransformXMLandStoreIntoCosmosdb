@@ -93,6 +93,150 @@ book_df.show()
 
 # COMMAND ----------
 
+from delta.tables import *
+
+
+# COMMAND ----------
+
+# Define the path where you want to store the delta table
+path = "/mnt/delta/books"
+
+# Save DataFrame as a Delta table
+book_df.write.format("delta").mode("overwrite").save(path)
+
+
+# COMMAND ----------
+
+# Read data from a Delta table
+read_df = spark.read.format("delta").load(path)
+read_df.show()
+
+
+# COMMAND ----------
+
+# Register the Delta table in the Hive metastore
+spark.sql(f"CREATE TABLE books USING DELTA LOCATION '{path}'")
+
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC
+# MAGIC -- This query selects everything from your "books" table
+# MAGIC SELECT * FROM books
+# MAGIC
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC
+# MAGIC -- This query selects everything from your "books" table
+# MAGIC SELECT * FROM books
+
+# COMMAND ----------
+
+# MAGIC %fs ls
+# MAGIC
+
+# COMMAND ----------
+
+# MAGIC %fs ls /mnt/delta
+# MAGIC
+
+# COMMAND ----------
+
+# Assuming your Delta table is stored at a specific path
+DELTA_TABLE_PATH = "/mnt/delta/books"
+
+# Read the Delta table into a DataFrame
+df = spark.read.format("delta").load(DELTA_TABLE_PATH)
+
+
+# COMMAND ----------
+
+from pyspark.sql.functions import col
+from pyspark.sql.types import DoubleType
+
+# Perform the cast operation
+df_transformed = df.withColumn("price", col("price").cast(DoubleType()))
+
+
+# COMMAND ----------
+
+# Overwrite the original Delta table with the transformed DataFrame
+df_transformed.write.format("delta").mode("overwrite").save(DELTA_TABLE_PATH)
+
+
+# COMMAND ----------
+
+# Write back to Delta with mergeSchema option
+df_transformed.write.format("delta") \
+    .option("mergeSchema", "true") \
+    .mode("overwrite") \
+    .save(DELTA_TABLE_PATH)
+
+
+# COMMAND ----------
+
+df = spark.read.format("delta").load(DELTA_TABLE_PATH)
+
+
+# COMMAND ----------
+
+df_with_new_column = df.withColumn("price_double", col("price").cast(DoubleType()))
+
+
+# COMMAND ----------
+
+df_with_new_column.write.format("delta").mode("overwrite").save(DELTA_TABLE_PATH)
+
+
+# COMMAND ----------
+
+df_with_new_column.write.format("delta") \
+    .option("mergeSchema", "true") \
+    .mode("overwrite") \
+    .save(DELTA_TABLE_PATH)
+
+
+# COMMAND ----------
+
+df = spark.read.format("delta").load(DELTA_TABLE_PATH)
+
+
+# COMMAND ----------
+
+final_df = df_with_new_column.drop("price") \
+    .withColumnRenamed("price_double", "price")
+
+
+# COMMAND ----------
+
+final_df.write.format("delta") \
+    .option("overwriteSchema", "true") \
+    .mode("overwrite") \
+    .save(DELTA_TABLE_PATH)
+
+
+# COMMAND ----------
+
+df = spark
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC Select * FROM books
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
 
 
 # COMMAND ----------
